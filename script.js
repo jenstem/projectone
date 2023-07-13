@@ -7,6 +7,7 @@ var searchText = document.querySelector("#search-box");
 var searchBtn = document.querySelector("#searchButton");
 var searchedCities = document.querySelector("#searchedCities");
 var cityName = document.querySelector("#city-name");
+var airEl = document.querySelector("#air");
 
 
 
@@ -24,7 +25,10 @@ var mapEl = document.querySelector("#mapone");
 
 // search button event listener
 searchBtn.addEventListener("click", function (e) {
-    e.preventDefault();
+    // preventDefault when button is in a form
+    // e.preventDefault();
+    console.log("search button clicked");
+    console.log(searchText.value);
     citySearch(searchText.value);
 });
 // function for search
@@ -32,21 +36,45 @@ function citySearch(searchResults) {
     var airQuality;
     if (searchResults === "Good" || searchResults === "Fair" || searchResults === "Moderate" || searchResults === "Poor" || searchResults === "Very Poor") {
         airQuality = searchResults;
-        console.log(searchResults);
         return;
+
     }
+
+
+    var apiKeyAir = "8686e0fe4732b6b364f3c95d6dfcf09c";
+    var apiUrlGeo = "http://api.openweathermap.org/geo/1.0/direct?q=" + cityName + "&appid=" + apiKeyAir;
+    console.log("inside citySearch", searchResults);
+    fetch(apiUrlGeo)
+        .then(function (response) {
+            return response.json();
+        })
+        .then(function (response) {
+            console.log(response);
+            // getAirQuality(response);
+            var {lat, lon, name} = response[0];
+            console.log(lat, lon);
+            getQuality(lat, lon, name);
+        });
 }
 // Fetch the air quality
-function getQuality(cityName) {
+function getQuality(lat, lon, name) {
     var apiKeyAir = "8686e0fe4732b6b364f3c95d6dfcf09c";
-    var apiUrlAir = "http://api.openweathermap.org/geo/1.0/direct?q=" + cityName + "&appid=" + apiKeyAir;
+    var apiUrlAir = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKeyAir}`;
     fetch(apiUrlAir)
         .then(function (response) {
             return response.json();
         })
         .then(function (response) {
-            getAirQuality(response);
+            console.log("air response", response);
+            // getAirQuality(response);
+            var {aqi} = response.list[0].main;
+            console.log(aqi);
+            renderAirQuality(aqi, name);
         });
+
+
+
+        // display an icon to represent good, fair, moderate, poor, very poor and we create our own scale
 
 function getAirQuality(response) {
     // figure out variables and array for this
@@ -62,3 +90,31 @@ function getAirQuality(response) {
 }
 
 }
+
+function renderAirQuality(aqi, cityName) {
+  var nameOfCity = document.createElement("h2");
+  var airQualityEl = document.createElement("h3");
+  nameOfCity.textContent = cityName;
+  var airQuality;
+  if (aqi == 1) {
+    airQuality = "Good";
+  }
+  if (aqi == 2) {
+    airQuality = "Fair";
+  }
+  if (aqi == 3) {
+    airQuality = "Moderate";
+  }
+  if (aqi == 4) {
+    airQuality = "Poor";
+  }
+  if (aqi == 5) {
+    airQuality = "Very Poor";
+  }
+  airQualityEl.textContent = airQuality;
+  airEl.append(nameOfCity, airQualityEl);
+  console.log("aqi", aqi);
+  console.log(cityName);
+;}
+
+// Is client-side storage the same as local storage?
