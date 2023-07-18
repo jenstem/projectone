@@ -13,6 +13,7 @@ var rapidApiKey = "b9b932d13amshd7a22bc43c9b9cep19e1b4jsn54e36226b53c";
 var searchText = document.querySelector("#search-box");
 var searchBtn = document.querySelector("#searchButton");
 var searchedCities = document.querySelector("#searchedCities");
+var searchedCityEL = document.querySelector("#location-search");
 
 var cityName = document.querySelector("#city-name");
 var airEl = document.querySelector("#air");
@@ -22,6 +23,8 @@ var mapContainer = document.querySelector(".map-container");
 var mapOne = document.querySelector("#map-one");
 var mapEl = document.querySelector("#mapone");
 
+searchedCityEL.style.display = 'none';
+
 // variables to handle maps
 // var googleMaps = ;
 // var openWeather = ;
@@ -30,10 +33,52 @@ var mapEl = document.querySelector("#mapone");
 
 // search button event listener
 
-searchBtn.addEventListener("click", function (e) {
+searchBtn.addEventListener("click", function () {
     console.log(searchText.value);
     citySearch(searchText.value);
 });
+
+function saveTheCityBtn(locateCity) {
+  var searchingButton = document.createElement("button");
+  searchingButton.classList.add("btn", "btn-outline-secondary", "w-100");
+  searchingButton.textContent = locateCity;
+  searchedCities.appendChild(searchingButton);
+  searchingButton.addEventListener("click", function (event) {
+      var citySearched = event.target.textContent;
+      saveCityList(citySearched);
+  });
+}
+
+function saveCityList(citySearched) {
+  citySearch(citySearched)
+  searchText.classList.remove('col-12')
+  searchText.classList.add('col-4')
+  searchedCityEL.style.display = '';
+}
+
+// Save in localStorage
+function saveCity(citySearched) {
+  var savedCities = localStorage.getItem("savedCities");
+  if (savedCities) {
+      savedCities = JSON.parse(savedCities);
+  } else {
+      savedCities = [];
+  }
+  savedCities.push(citySearched);
+  localStorage.setItem("savedCities", JSON.stringify(savedCities));
+}
+
+// Save the searched cities
+function saveTheBtns() {
+  var savedCities = localStorage.getItem("savedCities");
+  if (savedCities) {
+      savedCities = JSON.parse(savedCities);
+      savedCities.innerHTML = "";
+      for (let i = 0; i < savedCities.length; i++) {
+          saveTheCityBtn(savedCities[i]);
+      }
+  }
+}
 
 //googlemap
 function myMap(lat,lon) {
@@ -43,6 +88,7 @@ function myMap(lat,lon) {
   };
   var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
 }
+
 
 // function for search
 function citySearch(cityName) {
